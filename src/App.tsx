@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import throneCharacters from './api/api.mock.json'
-import { Card, CardContent, CardMedia, Typography, IconButton, Box, Button, Paper, AppBar, Toolbar, ThemeProvider, createTheme } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Typography, Box, Button, AppBar, Toolbar, ThemeProvider, createTheme } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { Id, Character } from './types';
 import CharacterCard from './assets/CharacterCard';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext } from '@dnd-kit/sortable';
 
 function App() {
   const [characters, setCharacters] = useState<Character[]>(throneCharacters);
   const [charactersDivided, setCharactersDivided] = useState<Character[][]>([]);
-  const [numberOfAddedCharacters, setNumberOfAddedCharacters] = useState(0)
+  const [numberOfAddedCharacters, setNumberOfAddedCharacters] = useState(0);
+  const [activeCard, setActiveCard] = useState<Character | null>(null);
 
   const numberOfColumns = 3;
 
@@ -22,7 +24,7 @@ function App() {
     }
 
     setCharactersDivided(GridData);
-  }, [numberOfAddedCharacters]);
+  }, [numberOfAddedCharacters, characters]);
 
   const deleteCharacter = (id: Id) => {
     setNumberOfAddedCharacters((prev) => prev - 1)
@@ -41,36 +43,85 @@ function App() {
     },
   })
 
+  const charactersIds = useMemo(() => {
+    return characters.map(character => character.id)
+  }, [characters]);
+
+  const onDragStart = (event: DragStartEvent) => {
+    if(event.active.data.current?.type === 'Character') {
+      setActiveCard(event.active.data.current.character);
+      return;
+    }
+  };
+
+  const onDragEnd = (event: DragEndEvent) => {
+    setActiveCard(null);
+
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    setCharacters(characters => {
+      const activeCharacterIndex = characters.findIndex((char) => char.id === activeId);
+      const overCharacterIndex = characters.findIndex((char) => char.id === overId);
+
+      return arrayMove(characters, activeCharacterIndex, overCharacterIndex)
+    })
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3,
+      }
+    })
+  )
+
 
   return (
     <ThemeProvider theme={theme}>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            GoT MarketPlace
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Box paddingTop={3} paddingBottom={3} display={'flex'} justifyContent={'flex-end'}>
-        <Button
-          variant="outlined"
-          startIcon={<AddCircleOutlineIcon />}
-          onClick={() => setNumberOfAddedCharacters((prev) => prev + 1)}
-        >
-          Add Character
-        </Button>
-      </Box>
-      <Box display={'flex'} justifyContent={'center'}>
-        <Box maxWidth={1800}>
-          {charactersDivided.map((row, index) => (
-            <div className='grid-row' key={index} id={'index'}>
-              {row.map(character => (
-                <CharacterCard key={character.id} character={character} deleteCharacter={deleteCharacter} />
-              ))}
-            </div>
-          ))}
+      <DndContext
+        sensors={sensors}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+      >
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              GoT MarketPlace
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <Box paddingTop={3} paddingBottom={3} display={'flex'} justifyContent={'flex-end'}>
+          <Button
+            variant="outlined"
+            startIcon={<AddCircleOutlineIcon />}
+            onClick={() => setNumberOfAddedCharacters((prev) => prev + 1)}
+          >
+            Add Character
+          </Button>
         </Box>
-      </Box>
+        <Box display={'flex'} justifyContent={'center'}>
+          <Box maxWidth={1800}>
+            {charactersDivided.map((row, index) => (
+              <div className='grid-row' key={index} id={'index'}>
+                <SortableContext items={charactersIds}>
+                  {row.map(character => (
+                    <CharacterCard key={character.id} character={character} deleteCharacter={deleteCharacter} />
+                  ))}
+                </SortableContext>
+              </div>
+            ))}
+          </Box>
+        </Box>
+        <DragOverlay>
+          {activeCard && <CharacterCard key={activeCard.id} character={activeCard} deleteCharacter={deleteCharacter} />}
+        </DragOverlay>
+      </DndContext>
     </ThemeProvider>
   )
 }
