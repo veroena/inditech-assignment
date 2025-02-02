@@ -44,15 +44,15 @@ const CharacterCard = ({ character, deleteCharacter }: Props) => {
     >
       <Card key={character.id} sx={{ maxWidth: 345 }}>
         <CardMedia
-          sx={{ height: 140 }}
+          sx={{ height: 300 }}
           image={character.imageUrl}
           title={character.name}
         />
-        <CardContent>
+        <CardContent style={{display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap'}}>
           <Typography gutterBottom variant="h5" component="div">
             {character.name}
           </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary'}}>
             {character.title}
           </Typography>
           <IconButton aria-label="delete" onClick={() => deleteCharacter(character.id)}>
