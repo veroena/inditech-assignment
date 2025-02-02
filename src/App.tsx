@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import throneCharacters from './api/api.mock.json'
-import { Typography, Box, Button, AppBar, Toolbar, ThemeProvider, createTheme } from '@mui/material';
+import { Typography, Box, Button, AppBar, Toolbar, ThemeProvider, createTheme, IconButton } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { Id, Character } from './types';
 import CharacterCard from './assets/CharacterCard';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -13,6 +14,7 @@ function App() {
   const [charactersDivided, setCharactersDivided] = useState<Character[][]>([]);
   const [numberOfAddedCharacters, setNumberOfAddedCharacters] = useState(0);
   const [activeCard, setActiveCard] = useState<Character | null>(null);
+  const [zoom, setZoom] = useState<number>(1);
 
   const numberOfColumns = 3;
 
@@ -81,6 +83,18 @@ function App() {
     })
   )
 
+  const zoomIn = () => {
+    if(zoom > 0.5) {
+      setZoom((prev) => prev - 0.1)
+    }
+  }
+
+  const zoomOut = () => {
+    if(zoom < 1.5) {
+      setZoom((prev) => prev + 0.1)
+    }
+  }
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -96,7 +110,7 @@ function App() {
             </Typography>
           </Toolbar>
         </AppBar>
-        <Box paddingTop={3} paddingBottom={3} display={'flex'} justifyContent={'flex-end'}>
+        <Box padding={4} display={'flex'} justifyContent={'space-between'}>
           <Button
             variant="outlined"
             startIcon={<AddCircleOutlineIcon />}
@@ -104,8 +118,12 @@ function App() {
           >
             Add Character
           </Button>
+          <Box>
+            <IconButton onClick={zoomOut}><AddCircleOutlineIcon fontSize='large' /></IconButton>
+            <IconButton onClick={zoomIn}><RemoveCircleOutlineIcon fontSize='large' /></IconButton>
+          </Box>
         </Box>
-        <Box display={'flex'} justifyContent={'center'}>
+        <Box display={'flex'} justifyContent={'center'} style={{zoom: zoom}}>
           <Box maxWidth={1800}>
             {charactersDivided.map((row, index) => (
               <div className='grid-row' key={index} id={'index'}>
