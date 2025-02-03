@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import './App.css';
 import throneCharacters from './api/api.mock.json'
-import { Typography, Box, Button, AppBar, Toolbar, ThemeProvider, createTheme, IconButton } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { Id, Character } from './types';
+import './App.css';
+import Header from './assets/Header';
+import ButtonsContainer from './assets/ButtonsContainer';
 import CharacterCard from './assets/CharacterCard';
+import { useEffect, useMemo, useState } from 'react';
+import { Box, ThemeProvider, createTheme } from '@mui/material';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
 
@@ -50,7 +50,7 @@ function App() {
   }, [characters]);
 
   const onDragStart = (event: DragStartEvent) => {
-    if(event.active.data.current?.type === 'Character') {
+    if (event.active.data.current?.type === 'Character') {
       setActiveCard(event.active.data.current.character);
       return;
     }
@@ -84,13 +84,13 @@ function App() {
   )
 
   const zoomIn = () => {
-    if(zoom > 0.5) {
+    if (zoom > 0.5) {
       setZoom((prev) => prev - 0.1)
     }
   }
 
   const zoomOut = () => {
-    if(zoom < 1.5) {
+    if (zoom < 1.5) {
       setZoom((prev) => prev + 0.1)
     }
   }
@@ -103,27 +103,9 @@ function App() {
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
       >
-        <AppBar position="static">
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              GoT MarketPlace
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        <Box padding={4} display={'flex'} justifyContent={'space-between'}>
-          <Button
-            variant="outlined"
-            startIcon={<AddCircleOutlineIcon />}
-            onClick={() => setNumberOfAddedCharacters((prev) => prev + 1)}
-          >
-            Add Character
-          </Button>
-          <Box>
-            <IconButton onClick={zoomOut}><AddCircleOutlineIcon fontSize='large' /></IconButton>
-            <IconButton onClick={zoomIn}><RemoveCircleOutlineIcon fontSize='large' /></IconButton>
-          </Box>
-        </Box>
-        <Box display={'flex'} justifyContent={'center'} style={{zoom: zoom}}>
+        <Header title="GoT Marketplace" />
+        <ButtonsContainer setNumberOfAddedCharacters={setNumberOfAddedCharacters} zoomIn={zoomIn} zoomOut={zoomOut} />
+        <Box display={'flex'} justifyContent={'center'} style={{ zoom: zoom }}>
           <Box maxWidth={1800}>
             {charactersDivided.map((row, index) => (
               <div className='grid-row' key={index} id={'index'}>

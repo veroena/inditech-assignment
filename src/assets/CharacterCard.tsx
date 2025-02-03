@@ -1,6 +1,6 @@
+import { Character, Id } from '../types';
 import { Card, CardMedia, CardContent, Typography, IconButton } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Character, Id } from '../types';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities'
 
@@ -48,11 +48,11 @@ const CharacterCard = ({ character, deleteCharacter }: Props) => {
           image={character.imageUrl}
           title={character.name}
         />
-        <CardContent style={{display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap'}}>
+        <CardContent style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap' }}>
           <Typography gutterBottom variant="h5" component="div">
             {character.name}
           </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary'}}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             {character.title}
           </Typography>
           <IconButton aria-label="delete" onClick={() => deleteCharacter(character.id)}>
